@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>줌쥐카페 (Opossum Cafe) - 3D Interactive</title>
+    <meta name="description" content="주머니쥐가 운영하는 3D 인터랙티브 카페">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="loading-screen">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <p class="loader-text">줌쥐가 카페 문을 여는 중...</p>
+        </div>
+    </div>
+
+    <canvas id="three-canvas"></canvas>
+
+    <div id="ui-overlay">
+        <!-- Customer Speech Bubble -->
+        <div id="order-bubble" class="bubble-container">
+            <div class="bubble-content">
+                <p id="order-text">주문을 기다리고 있어요...</p>
+            </div>
+            <div class="bubble-tail"></div>
+        </div>
+
+        <!-- Feedback for ingredient added -->
+        <div id="feedback-message" class="hidden"></div>
+
+        <!-- Recipe Button -->
+        <button id="recipe-btn">📖 레시피</button>
+
+        <!-- 날짜 표시 -->
+        <div id="day-display">1일차</div>
+
+        <!-- Money Panel -->
+        <div id="money-panel">
+            <div class="money-label">💰 수익</div>
+            <div id="money-display">₩ 0</div>
+        </div>
+
+        <!-- Happiness Gauge -->
+        <div id="happiness-panel">
+            <div class="happiness-label">😊 행복도</div>
+            <div id="happiness-bar-wrap">
+                <div id="happiness-bar"></div>
+            </div>
+            <div id="happiness-value">100%</div>
+        </div>
+
+        <!-- Recipe/Status Panel -->
+        <div id="status-panel">
+            <div class="current-cup">
+                <h3>현재 컵 상태</h3>
+                <ul id="ingredient-list">
+                    <li class="empty">비어 있음</li>
+                </ul>
+                <button id="serve-btn" class="hidden">서빙하기!</button>
+                <button id="reset-btn">버리기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 아래 모든 오버레이는 ui-overlay 밖 (pointer-events 문제 방지) ===== -->
+
+    <!-- Recipe Modal -->
+    <div id="recipe-modal" class="hidden">
+        <div id="recipe-content">
+            <h2>☕ 레시피북</h2>
+            <ul id="recipe-list"></ul>
+            <button id="recipe-close-btn">닫기</button>
+        </div>
+    </div>
+
+    <!-- 영업 종료 (타이머) -->
+    <div id="gameover-overlay" class="hidden">
+        <div id="gameover-content">
+            <div class="gameover-title">🔒 영업 종료</div>
+            <p class="gameover-sub">오늘도 수고했어요, 주머니쥐!</p>
+            <div class="gameover-money-label">오늘의 수익</div>
+            <div id="final-money" class="gameover-money">₩ 0</div>
+            <button id="confirm-btn">확인</button>
+        </div>
+    </div>
+
+    <!-- 게임 오버 (행복도 0%) -->
+    <div id="gameover-screen" class="hidden">
+        <div id="gameover-screen-content">
+            <div class="go-emoji">😵</div>
+            <div class="go-title">줌쥐가 지쳐버렸어요...</div>
+            <p class="go-sub">더 이상 커피를 못 만들겠어요!</p>
+            <div class="go-stats">
+                <div class="go-stat">
+                    <span class="go-stat-label">📅 일수</span>
+                    <span id="go-day" class="go-stat-value">1일차</span>
+                </div>
+                <div class="go-stat">
+                    <span class="go-stat-label">💰 번 돈</span>
+                    <span id="go-money" class="go-stat-value">₩ 0</span>
+                </div>
+                <div class="go-stat">
+                    <span class="go-stat-label">☕ 만든 커피</span>
+                    <span id="go-count" class="go-stat-value">0잔</span>
+                </div>
+            </div>
+            <button id="restart-btn">🔄 다시 시작</button>
+        </div>
+    </div>
+
+    <!-- 침대 버튼 (집 장면) -->
+    <button id="bed-btn" class="hidden">🛏️ 자러 가기</button>
+
+    <!-- 핸드폰 UI (집 장면) -->
+    <div id="phone-ui" class="hidden">
+        <div class="phone-app-title">📱 알페스 99</div>
+        <div class="phone-app-divider"></div>
+        <div class="phone-gacha-art">🎰</div>
+        <button id="gacha-btn">✨ 가챠 돌리기</button>
+    </div>
+
+    <!-- 수면 모달 -->
+    <div id="sleep-modal" class="hidden">
+        <div id="sleep-content">
+            <div class="sleep-emoji">🌙</div>
+            <h2 class="sleep-title">잘 자요, 주머니쥐!</h2>
+            <button id="open-cafe-btn">☀️ 카페 문 열기</button>
+        </div>
+    </div>
+    <div id="home-bubble" class="hidden">
+        <div id="home-bubble-text"></div>
+    </div>
+
+    <!-- 시작 안내창 -->
+    <div id="welcome-modal">
+        <div id="welcome-content">
+            <div class="welcome-emoji">🐾</div>
+            <h2 class="welcome-title">주머니쥐 카페에 오신 것을 환영합니다!</h2>
+            <p class="welcome-body">쥑쥑씨는 낮에는 카페에서 일하고,<br>밤에는 미소녀 가챠 게임을 하며 스트레스를 풉니다.<br><br>돈과 행복도를 잘 관리해서<br>쥑쥑씨를 행복하게 만들어 주세요!</p>
+            <button id="welcome-btn">☕ 시작하기</button>
+        </div>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module" src="main.js"></script>
+</body>
+</html>
