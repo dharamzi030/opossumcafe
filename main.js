@@ -17,9 +17,9 @@ const COLORS = {
 const ITEMS = [
     { name: 'Coffee Machine', id: 'coffee', x: -5, color: COLORS.coffee, description: '에스프레소' },
     { name: 'Coffee Cup', id: 'cup', x: -2.5, color: 0xFFFFFF, description: '컵' },
-    { name: 'Water', id: 'water', x: 2, color: COLORS.water, description: '물' },
-    { name: 'Syrup', id: 'syrup', x: 4.5, color: COLORS.syrup, description: '시럽' },
-    { name: 'Milk', id: 'milk', x: 7, color: COLORS.milk, description: '우유' },
+    { name: 'Water', id: 'water', x: 0.5, color: COLORS.water, description: '물' },
+    { name: 'Syrup', id: 'syrup', x: 2.5, color: COLORS.syrup, description: '시럽' },
+    { name: 'Milk', id: 'milk', x: 4.5, color: COLORS.milk, description: '우유' },
 ];
 
 // ===== Scene Setup =====
